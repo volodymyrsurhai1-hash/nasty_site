@@ -1,0 +1,97 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Assessment of Side Effect Risks When Taking COCs</title>
+    <link rel="stylesheet" href="{% static 'nasty_survey/styles.css' %}" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" data-i18n="eyebrow">Combined oral contraceptives</p>
+          <h1 data-i18n="title">Assessment of Side Effect Risks When Taking COCs</h1>
+        </div>
+        <div style="display: flex; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: 0 8px 22px rgba(120, 35, 68, 0.1); flex-shrink: 0; padding: 4px;">
+          <button class="lang-button is-active" type="button" data-lang="en">EN</button>
+          <button class="lang-button" type="button" data-lang="uk">UA</button>
+        </div>
+      </header>
+
+      <section class="workspace" aria-live="polite">
+        <aside class="status-panel">
+          <div class="progress-copy">
+            <span id="stepLabel">Section 1 of 8</span>
+            <strong id="sectionTitle">Basic Information</strong>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <span id="progressBar"></span>
+          </div>
+          <ol id="sectionList" class="section-list"></ol>
+        </aside>
+
+        <section class="question-panel" id="questionPanel">
+          {% csrf_token %}
+          <form id="riskForm" novalidate></form>
+          <div class="navigation">
+            <button class="ghost-button" id="backButton" type="button" data-i18n="back">Back</button>
+            <button class="primary-button" id="nextButton" type="button" data-i18n="next">Next</button>
+          </div>
+        </section>
+
+        <section class="result-panel" id="resultPanel" hidden>
+          <div class="result-heading">
+            <p class="eyebrow" data-i18n="resultEyebrow">Assessment result</p>
+            <h2 id="resultTitle">Low risk</h2>
+            <p id="resultMessage"></p>
+          </div>
+
+          <div class="score-block">
+            <div>
+              <span data-i18n="scoreLabel">Risk score</span>
+              <strong id="scoreValue">0</strong>
+            </div>
+            <div>
+              <span data-i18n="scoreMeaningLabel">Score meaning</span>
+              <strong id="scoreMeaning">Low</strong>
+            </div>
+          </div>
+
+          <div class="factor-grid">
+            <section>
+              <h3 data-i18n="highFactors">High-risk factors</h3>
+              <ul id="highFactorList"></ul>
+            </section>
+            <section>
+              <h3 data-i18n="moderateFactors">Moderate-risk factors</h3>
+              <ul id="moderateFactorList"></ul>
+            </section>
+          </div>
+
+          <div class="notice" id="pregnancyNotice" hidden></div>
+          <div class="notice">
+            <strong data-i18n="disclaimerTitle">Important disclaimer</strong>
+            <p data-i18n="disclaimerText">
+              This tool is based on a simplified WHO MEC-style rule set and is intended for educational purposes only. It does not replace professional medical consultation.
+            </p>
+          </div>
+
+          <div class="references">
+            <span data-i18n="references">References:</span>
+            <a href="https://www.who.int/publications/i/item/9789240115583" target="_blank" rel="noreferrer">WHO MEC</a>
+            <a href="https://www.cdc.gov/contraception/hcp/usmec/index.html" target="_blank" rel="noreferrer">CDC U.S. MEC</a>
+          </div>
+
+          <div class="navigation result-actions">
+            <button class="ghost-button" id="editButton" type="button" data-i18n="editAnswers">Edit answers</button>
+            <button class="primary-button" id="restartButton" type="button" data-i18n="restart">Start again</button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="{% static 'nasty_survey/script.js' %}"></script>
+  </body>
+</html>

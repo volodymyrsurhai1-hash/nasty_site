@@ -1,0 +1,334 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Survey Results — COC Risk Assessment</title>
+    <link rel="stylesheet" href="{% static 'nasty_survey/styles.css' %}" />
+    <style>
+      .results-header {
+        margin-bottom: 32px;
+      }
+
+      .results-header h2 {
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        margin-bottom: 6px;
+        line-height: 1.1;
+      }
+
+      .results-header p {
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .results-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .result-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: transform 150ms ease, box-shadow 150ms ease;
+      }
+
+      .result-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 24px 56px rgba(120, 35, 68, 0.17);
+      }
+
+      .result-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--line);
+        flex-wrap: wrap;
+      }
+
+      .result-card-name {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .name-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--primary-soft);
+        border: 2px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1rem;
+        color: var(--primary-dark);
+        flex-shrink: 0;
+      }
+
+      .name-text strong {
+        display: block;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--ink);
+      }
+
+      .name-text span {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+
+      .result-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .risk-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 0.82rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .risk-badge.high {
+        background: var(--danger-soft);
+        color: var(--danger);
+        border: 1px solid var(--danger);
+      }
+
+      .risk-badge.moderate {
+        background: var(--warning-soft);
+        color: var(--warning);
+        border: 1px solid var(--warning);
+      }
+
+      .risk-badge.low {
+        background: var(--success-soft);
+        color: var(--success);
+        border: 1px solid var(--success);
+      }
+
+      .risk-badge.consult {
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        border: 1px solid var(--primary);
+      }
+
+      .risk-badge::before {
+        content: '';
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        flex-shrink: 0;
+      }
+
+      .score-pill {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--surface-strong);
+        border: 1px solid var(--line);
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .score-pill strong {
+        color: var(--ink);
+      }
+
+      .pregnant-badge {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--primary-soft);
+        border: 1px solid var(--line);
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+      }
+
+      .result-card-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+
+      .factor-section {
+        padding: 18px 24px;
+      }
+
+      .factor-section:first-child {
+        border-right: 1px solid var(--line);
+      }
+
+      .factor-section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+      }
+
+      .factor-section-title .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .dot.high { background: var(--danger); }
+      .dot.moderate { background: var(--warning); }
+
+      .factor-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .factor-tag {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+
+      .factor-tag.high {
+        background: var(--danger-soft);
+        color: var(--danger);
+      }
+
+      .factor-tag.moderate {
+        background: var(--warning-soft);
+        color: var(--warning);
+      }
+
+      .factor-tag.none {
+        background: var(--success-soft);
+        color: var(--success);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--muted);
+      }
+
+      .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+      }
+
+      @media (max-width: 640px) {
+        .result-card-body {
+          grid-template-columns: 1fr;
+        }
+        .factor-section:first-child {
+          border-right: none;
+          border-bottom: 1px solid var(--line);
+        }
+        .result-card-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Combined oral contraceptives</p>
+          <h1>Survey Results</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0; padding-top: 4px;">
+          <a href="/" class="primary-button" style="text-decoration: none; display: flex; align-items: center; justify-content: center; min-height: 44px; min-width: 0; padding: 0 20px;">
+            ← New Survey
+          </a>
+        </div>
+      </header>
+
+      <div class="results-header">
+        <h2>Patient Records</h2>
+        <p>{{ results|length }} result{% if results|length != 1 %}s{% endif %} found</p>
+      </div>
+
+      <div class="results-grid">
+        {% for r in results %}
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="result-card-name">
+              <div class="name-avatar">{{ r.obj.first_name|first|upper }}{{ r.obj.last_name|first|upper }}</div>
+              <div class="name-text">
+                <strong>{{ r.obj.first_name }} {{ r.obj.last_name }}</strong>
+                <span>{{ r.obj.created_at|date:"d M Y, H:i" }}</span>
+              </div>
+            </div>
+            <div class="result-card-meta">
+              <span class="risk-badge {{ r.obj.risk_level }}">{{ r.obj.risk_level }}</span>
+              <span class="score-pill">Score: <strong>{{ r.obj.score }}</strong></span>
+              {% if r.obj.is_pregnant %}
+              <span class="pregnant-badge">⚠ Pregnant</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="result-card-body">
+            <div class="factor-section">
+              <div class="factor-section-title">
+                <span class="dot high"></span>High-risk factors
+              </div>
+              <div class="factor-tags">
+                {% if r.high_factors %}
+                  {% for factor in r.high_factors %}
+                    <span class="factor-tag high">{{ factor }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="factor-tag none">None</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="factor-section">
+              <div class="factor-section-title">
+                <span class="dot moderate"></span>Moderate-risk factors
+              </div>
+              <div class="factor-tags">
+                {% if r.moderate_factors %}
+                  {% for factor in r.moderate_factors %}
+                    <span class="factor-tag moderate">{{ factor }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="factor-tag none">None</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="result-card empty-state">
+          <p>No results yet. Complete the survey to see records here.</p>
+          <a href="/" class="primary-button" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Start Survey</a>
+        </div>
+        {% endfor %}
+      </div>
+    </main>
+  </body>
+</html>
